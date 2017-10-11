@@ -6,7 +6,11 @@
 <body>
     <header>
    </header>
-<p>well hello there</p>
-<p><%= shortURL%> : <%=longURL %></p>
+<p style = "margin: 25px"><%= data.shortURL%> : <%=data.longURL %></p>
+<form action="/urls/<%= data.shortURL%>" method="POST" style="margin:25px;">
+  <label for="longURL">Enter an updated URL:</label>
+  <input id="longURL" type="text" name="longURL" placeholder=<%= data.longURL%> style="width: 250px">
+  <input type="submit" value="Submit">
+</form>
 </body>
 </html>

@@ -4,10 +4,17 @@
   <% include ./partials/_header %>  
 </head>
 <body>
-  <table>
+  <table style = "margin: 25px">
     <% for(var i in urls) { %>
-        <tr>
-        <td><a href=<%= urls[i] %> ><%= i %></a>; <%= urls[i] %></td> 
+    <tr>
+      <td><%= i %></td>
+      <td>&#10143 <a style="text-decoration:none;" href=<%= urls[i] %>><%= urls[i] %></a></td> 
+      <td><a href="/urls/<%= i %>"><button>Edit</button></a> </td>
+      <td>
+        <form action="/urls/<%= i %>/delete" method="POST">        
+          <button type="submit">Delete</button>
+        </form>  
+      </td> 
     </tr>
     <% } %>
 </table>

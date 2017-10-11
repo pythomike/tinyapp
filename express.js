@@ -6,19 +6,21 @@ const PORT = process.env.PORT || 8080; // default port 8080
 app.set('view engine', "ejs")
 
 
-
+// DATA
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-function randomString () {
+// FUNCYTOWN
+function randomString() {
   let shortURL = Math.random().toString(36).substring(2, 8)
-  return shortURL // RENAME THIS
+  return shortURL
 }
 
+// ENDPOINTS
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
@@ -27,8 +29,10 @@ app.get("/urls", (req, res) => {
 })
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); 
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let shortURL = randomString() 
+  urlDatabase[shortURL] = req.body.longURL
+  console.log("Adding:", shortURL, "-", req.body.longURL) // REMOVE BEFORE SUBMISSION
+  res.redirect("/urls/" + shortURL);  
 });
 
 app.get("/urls/new", (req, res) => {
@@ -37,14 +41,31 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = { 
+    data: {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id] };
+    longURL: urlDatabase[req.params.id]} };
   res.render("urls_show", templateVars);
+})
+
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL
+  console.log("New value for", req.params.id, "is", req.body.longURL) // REMOVE BEFORE SUBMISSION
+  res.redirect("/urls/")
+})
+
+app.get("/u/:id", (req, res) => {
+  res.redirect(urlDatabase[req.params.id]);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  console.log("Deleting:", req.params.id, "-", urlDatabase[req.params.id]) // REMOVE BEFORE SUBMISSION
+  delete urlDatabase[req.params.id]
+  res.redirect("/urls")
 })
 
 
 
-
+// SERVER JAZZ  
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp™ listening on port ${PORT}!`);
 });
