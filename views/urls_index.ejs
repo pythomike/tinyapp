@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <% include ./partials/_header %>  
+</head>
+<body>
+  <table>
+    <% for(var i in urls) { %>
+        <tr>
+        <td><a href=<%= urls[i] %> ><%= i %></a>; <%= urls[i] %></td> 
+    </tr>
+    <% } %>
+</table>
+  <button> <a href="/urls/new">New Short URL</a></button>
+</body>
+</html>
