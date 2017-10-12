@@ -57,7 +57,7 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 })
 
-app.get("/logout", (req, res) => {
+app.post("/logout", (req, res) => {
   res.clearCookie("name")
   res.redirect("/urls")
 })

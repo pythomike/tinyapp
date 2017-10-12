@@ -12,7 +12,7 @@
 <tr>
 <form action="/urls/<%= data.shortURL%>" method="POST" style="margin:25px;">
   <label style="margin:25px" for="longURL">Enter an updated URL:</label>
-  <input id="longURL" type="text" name="longURL" placeholder=<%= data.longURL%> style="width: 200px">
+  <input id="longURL" type="text" name="longURL" placeholder=<%= data.longURL%> style="width: 200px" required>
   <input type="submit" value="Submit">
 </form>
 </tr>
