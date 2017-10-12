@@ -1,24 +1,36 @@
 // REQUIREMENTS
-const express = require("express");
-const app = express();
-const bodyParser = require("body-parser");
-const PORT = process.env.PORT || 8080; // default port 8080
-const cookieParser = require('cookie-parser')
-app.use(bodyParser.urlencoded({extended: true}));
-app.set('view engine', "ejs")
-app.use(cookieParser())
+  const express = require("express");
+  const app = express();
+  const bodyParser = require("body-parser");
+  const PORT = process.env.PORT || 8080; // default port 8080
+  const cookieParser = require('cookie-parser')
+  app.use(bodyParser.urlencoded({extended: true}));
+  app.set('view engine', "ejs")
+  app.use(cookieParser())
 
 // DATA
-var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+  var urlDatabase = {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "9sm5xK": "http://www.google.com"
+  };
+  const users = { 
+    "userRandomID": {
+      id: "userRandomID", 
+      email: "user@example.com", 
+      password: "purple-monkey-dinosaur"
+    },
+  "user2RandomID": {
+      id: "user2RandomID", 
+      email: "user2@example.com", 
+      password: "dishwasher-funk"
+    }
+  }
 
 // FUNCYTOWN
-function randomString() {
-  let shortURL = Math.random().toString(36).substring(2, 8)
-  return shortURL
-}
+  function randomString() {
+    let shortURL = Math.random().toString(36).substring(2, 8)
+    return shortURL
+  }
 
 // ENDPOINTS
 app.get("/", (req, res) => {
@@ -87,6 +99,27 @@ app.post("/login", (req, res) => {
   res.redirect("urls")
 })
 
+app.get("/register", (req, res) => {
+  let templateVars = {
+    name: req.cookies["name"]
+  }
+  res.render("register", templateVars)
+})
+
+app.post("/register", (req, res) => {
+  console.log(req.body.email)
+  console.log(req.body.password)
+
+  let userID = randomString()
+  var newUser = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  users[userID] = newUser
+  res.cookie("id", userID)
+  res.redirect("urls")
+})
 
 // SERVER JAZZ  
 app.listen(PORT, () => {
