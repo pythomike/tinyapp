@@ -25,7 +25,7 @@
       password: "dishwasher-funk"
     },
     "moike": {
-      id: "user3RandomID", 
+      id: "mike", 
       email: "m@m", 
       password: "m"
     }
@@ -45,13 +45,13 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls : urlDatabase,
-    name: req.cookies["name"]
+    name: users[req.cookies["user_id"]],
   }
   res.render("urls_index", templateVars)
 })
 
 app.post("/urls", (req, res) => {
-  let shortURL = randomString() 
+  let shortURL = randomString()   
   urlDatabase[shortURL] = req.body.longURL
   console.log("Adding:", shortURL, "-", req.body.longURL) // REMOVE BEFORE SUBMISSION
   res.redirect("/urls/" + shortURL);  
@@ -59,7 +59,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    name: req.cookies["name"]
+    name: users[req.cookies["user_id"]]
   }
   res.render("urls_new", templateVars);
 });
@@ -69,13 +69,18 @@ app.get("/urls/:id", (req, res) => {
     data: {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id]},
-      name: req.cookies["name"]
+    name: users[req.cookies["user_id"]]
     }
   res.render("urls_show", templateVars);
+  let user = (req.cookies.user_id)
+  console.log(user)
+  //console.log(users)
+  console.log(users[user])
+  
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("name")
+  res.clearCookie("user_id")
   res.redirect("/urls")
 })
 
@@ -87,7 +92,7 @@ app.post("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   let templateVars = {
-    name: req.cookies["name"]
+  name: users[req.cookies["user_id"]]
   }
   res.redirect(urlDatabase[req.params.id], templateVars);
 });
@@ -98,6 +103,12 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls")
 })
 
+app.get("/login", (req, res) => {
+let templateVars = {name: users[req.cookies["user_id"]],}
+res.render("login", templateVars)
+})
+
+
 app.post("/login", (req, res) => {
   console.log("Logged in as", req.body.username)
   res.cookie("name", req.body.username)
@@ -106,7 +117,8 @@ app.post("/login", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    name: req.cookies["name"]
+    name: users[req.cookies["user_id"]],
+    user: users.name
   }
   res.render("register", templateVars)
 })
@@ -126,14 +138,13 @@ app.post("/register", (req, res) => {
       res.send("Registration error: Please use a different email. <a href=/register>Retry</a>")
     }
   }  
-
   var newUser = {
     id: userID,
     email: userName,
     password: userPass
   }
   users[userID] = newUser
-  res.cookie("id", userID)
+  res.cookie("user_id", userID)
   res.redirect("urls")
 })
 
@@ -141,3 +152,20 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`TinyApp™ listening on port ${PORT}!`);
 });
+
+// Fun for dealing with sessions - middleware for WebAuthentication, next is optional?
+// app.use((req, res, next) => {
+// const {userId} = req/session;
+// res.locals.user = userService.getById(userID)
+//   next()
+// })
+
+// function forbiddenIfNotLoggedIn (req, res, next) {
+//   if (res.locals.user === undefined){
+//     res.sendStatus(403)
+//   } else {
+//     next()
+//   }
+// }
+
+// app.use("/api", forbiddenIfNotLoggedIn);

@@ -7,18 +7,23 @@
           </tr>
           <tr>
             <% if (name) { %>
-              <td><p>Hello, <%= name %></p></td>
+              <td><p>Hello, <%= name.email %></p></td>
               <td>
               <form action="/logout" method="POST">
                 <button>Logout</button>
               </form>
             </td>
             <% } else { %>
-        <td><form action="/login" method="POST" >
-          <label for="username">Enter your username:</label>
-          <input id="username" type="text" name="username"style="width: 150px" required>
-          <input type="submit" value="Submit">
-        </form></td>
+        <td>
+            <form action="/login" method="GET" >
+              <button>Login</button>
+            </form>
+          </td>
+          <td>
+            <form action="/register" method="GET">
+              <button>Register</button>
+            </form>
+          </td>
         <% } %>
       </div>
       </div>    
