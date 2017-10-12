@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <% include ./partials/_header %>
+
 </head>
 <body>
-    <header>
-   </header>
-<p style = "margin: 25px"><%= data.shortURL%> : <%=data.longURL %></p>
-<form action="/urls/<%= data.shortURL%>" method="POST" style="margin:25px;">
-  <label for="longURL">Enter an updated URL:</label>
-  <input id="longURL" type="text" name="longURL" placeholder=<%= data.longURL%> style="width: 250px">
+  <header>  <% include ./partials/_header %></header>
+<table>
+  <tr>
+<p style="margin: 25px"><%= data.shortURL%> : <%=data.longURL %></p>
+  </tr>
+<tr>
+<form action="/urls/%= data.shortURL%>" method="POST" style="margin:25px;">
+  <label style="margin:25px" for="longURL">Enter an updated URL:</label>
+  <input id="longURL" type="text" name="longURL" placeholder=<%= data.longURL%> style="width: 200px">
   <input type="submit" value="Submit">
 </form>
+</tr>
+</table>
 </body>
 </html>

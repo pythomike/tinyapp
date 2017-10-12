@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <% include ./partials/_header %>  
-</head>
-<body>
-  <table style = "margin: 25px">
-    <% for(var i in urls) { %>
-    <tr>
-      <td><%= i %></td>
-      <td>&#10143 <a style="text-decoration:none;" href=<%= urls[i] %>><%= urls[i] %></a></td> 
-      <td><a href="/urls/<%= i %>"><button>Edit</button></a> </td>
-      <td>
-        <form action="/urls/<%= i %>/delete" method="POST">        
-          <button type="submit">Delete</button>
-        </form>  
-      </td> 
-    </tr>
-    <% } %>
-</table>
-  <button> <a href="/urls/new">New Short URL</a></button>
-</body>
+  <head>
+    <% include ./partials/_header %>  
+  </head>
+  <body>
+    <table style = "margin: 25px">
+      <% for(var i in urls) { %>
+      <tr>
+        <td><%= i %></td>
+        <td>&#10143 <a style="text-decoration:none;" href=<%= urls[i] %>><%= urls[i] %></a></td> 
+        <td><a href="/urls/<%= i %>"><button>Edit</button></a> </td>
+        <td>
+          <form action="/urls/<%= i %>/delete" method="POST">        
+            <button type="submit">Delete</button>
+          </form>  
+        </td> 
+      </tr>
+      <% } %>
+  </table>
+    <button style="margin-left:25px"> <a href="/urls/new">New Short URL</a></button>
+  </body>
 </html>
