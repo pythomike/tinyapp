@@ -23,6 +23,11 @@
       id: "user2RandomID", 
       email: "user2@example.com", 
       password: "dishwasher-funk"
+    },
+    "moike": {
+      id: "user3RandomID", 
+      email: "m@m", 
+      password: "m"
     }
   }
 
@@ -107,14 +112,25 @@ app.get("/register", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
-  console.log(req.body.email)
-  console.log(req.body.password)
-
+  let userName = req.body.email
+  let userPass = req.body.password
   let userID = randomString()
+
+  if (!userName || !userPass) {
+    res.status(400)
+    res.send("Registration Error: Please fill in both fields. <a href=/register>Retry</a>")
+  }
+  for (var check in users){
+    if (users[check].email === req.body.email){
+      res.status(400)
+      res.send("Registration error: Please use a different email. <a href=/register>Retry</a>")
+    }
+  }  
+
   var newUser = {
     id: userID,
-    email: req.body.email,
-    password: req.body.password
+    email: userName,
+    password: userPass
   }
   users[userID] = newUser
   res.cookie("id", userID)
