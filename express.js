@@ -25,7 +25,7 @@
       password: "dishwasher-funk"
     },
     "moike": {
-      id: "mike", 
+      id: "moike", 
       email: "m@m", 
       password: "m"
     }
@@ -35,6 +35,15 @@
   function randomString() {
     let shortURL = Math.random().toString(36).substring(2, 8)
     return shortURL
+  }
+
+  function authenticator(email, password, users) {
+    for (user in users) {
+      if (users[user].email === email && users[user].password === password) {
+        return users[user];
+      }
+    }
+    return undefined;
   }
 
 // ENDPOINTS
@@ -108,12 +117,26 @@ let templateVars = {name: users[req.cookies["user_id"]],}
 res.render("login", templateVars)
 })
 
-
 app.post("/login", (req, res) => {
-  console.log("Logged in as", req.body.username)
-  res.cookie("name", req.body.username)
-  res.redirect("urls")
+  let userEmail = req.body.email
+  let userPass = req.body.password                                       
+  
+  if (!userEmail || !userPass) {
+    res.status(400)
+    res.send("Login Error: Please fill in both fields. <a href=/login>Retry</a>")
+  }
+  
+  let checkr = authenticator(userEmail, userPass, users)
+  
+  if (checkr){
+    res.cookie("user_id", checkr.id)
+    res.redirect("urls")
+  } else {
+    res.status(400)
+    res.send("Login Error. <a href=/login>Retry</a>")
+  }
 })
+                                                             
 
 app.get("/register", (req, res) => {
   let templateVars = {
@@ -131,7 +154,7 @@ app.post("/register", (req, res) => {
   if (!userName || !userPass) {
     res.status(400)
     res.send("Registration Error: Please fill in both fields. <a href=/register>Retry</a>")
-  }
+  } 
   for (var check in users){
     if (users[check].email === req.body.email){
       res.status(400)
