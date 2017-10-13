@@ -4,6 +4,7 @@
   const bodyParser = require("body-parser");
   const PORT = process.env.PORT || 8080; // default port 8080
   const cookieParser = require('cookie-parser')
+  const bcrypt = require('bcrypt');
   app.use(bodyParser.urlencoded({extended: true}));
   app.set('view engine', "ejs")
   app.use(cookieParser())
@@ -17,6 +18,8 @@
   app.use('/urls/', (req, res, next) => {
     authorizor(req, res, next);
   });
+
+
 
 // DATA
   var urlDatabase = {
@@ -35,11 +38,8 @@
     "adfgae": {
       url: "http://www.reddit.com",
       userID: "moike"
+   }
   }
-}
-  //
-  // Need to add a value for createdBy. Each link needs to be associated with a userID
-  // 
   const users = { 
     "userRandomID": {
       id: "userRandomID", 
@@ -66,7 +66,7 @@
 
   function authenticator(email, password, users) {
     for (user in users) {
-      if (users[user].email === email && users[user].password === password) {
+      if (users[user].email === email && bcrypt.compareSync(password, users[user].password)) {
         return users[user];
       }
     }
@@ -77,7 +77,7 @@
       res.status(403)
       res.send("You are not a registered user, <a href=/login>login</a> or <a href=/register>register</a>")
     } else {
-      next()
+    next()
     }
   }
 
@@ -93,16 +93,12 @@
   function urlsForUser(id) {
     var output = {}
     for (url in urlDatabase){
-      console.log(id)
       if (urlDatabase[url].userID === id.id){
       output[url] = urlDatabase[url]
-    console.log(output) 
     }
     }
   return output
-}
-
-
+  }
 // ENDPOINTS
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -160,11 +156,9 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls/")
 })
 
-app.get("/u/:id", (req, res) => {
-  let templateVars = {
-  name: users[req.cookies["user_id"]]
-  }
-  res.redirect(urlDatabase[req.params.id], templateVars);
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL].url;
+  res.redirect(longURL);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -200,8 +194,7 @@ app.post("/login", (req, res) => {
     res.status(400)
     res.send("Login Error. <a href=/login>Retry</a>")
   }
-})
-                                                             
+})                                                            
 
 app.get("/register", (req, res) => {
   let templateVars = {
@@ -214,6 +207,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let userName = req.body.email
   let userPass = req.body.password
+  let hashedPassword = bcrypt.hashSync(userPass, 10);
   let userID = randomString()
 
   if (!userName || !userPass) {
@@ -229,9 +223,10 @@ app.post("/register", (req, res) => {
   var newUser = {
     id: userID,
     email: userName,
-    password: userPass
+    password: hashedPassword
   }
   users[userID] = newUser
+  console.log(users)
   res.cookie("user_id", userID)
   res.redirect("urls")
 })
@@ -240,20 +235,3 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`TinyApp™ listening on port ${PORT}!`);
 });
-
-// Fun for dealing with sessions - middleware for WebAuthentication, next is optional?
-// app.use((req, res, next) => {
-// const {userId} = req/session;
-// res.locals.user = userService.getById(userID)
-//   next()
-// })
-
-// function forbiddenIfNotLoggedIn (req, res, next) {
-//   if (res.locals.user === undefined){
-//     res.sendStatus(403)
-//   } else {
-//     next()
-//   }
-// }
-
-// app.use("/api", forbiddenIfNotLoggedIn);
