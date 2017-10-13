@@ -14,7 +14,7 @@
     next();
   });
 
-  app.use('/urls/new', (req, res, next) => {
+  app.use('/urls/', (req, res, next) => {
     authorizor(req, res, next);
   });
 
@@ -22,13 +22,21 @@
   var urlDatabase = {
     "b2xVn2": {
       url: "http://www.lighthouselabs.ca",
-      userID: "moike"
+      userID: "bob"
     },
     "9sm5xK": {
       url: "http://www.google.com",
       userID: "moike"
-    }
-  };
+    },
+    "6arg83": {
+      url: "http://www.cbc.ca",
+      userID: "moike"
+    },
+    "adfgae": {
+      url: "http://www.reddit.com",
+      userID: "moike"
+  }
+}
   //
   // Need to add a value for createdBy. Each link needs to be associated with a userID
   // 
@@ -66,14 +74,11 @@
   }
   function authorizor (req, res, next) {
     if (res.locals.user === undefined){
-      res.sendStatus(403)
+      res.status(403)
+      res.send("You are not a registered user, <a href=/login>login</a> or <a href=/register>register</a>")
     } else {
       next()
     }
-  }
-  function isThisYourLink(req, res, next){
-   
-
   }
 
   function getById(id) {
@@ -85,21 +90,17 @@
     return undefined;
   }
 
-  function createUser(email, name, password) {
-    const newUser = {
-      email,
-      name,
-      password: bcrypt.hashSync(password, 10),
-      id: rando(),
-    };
-    users.push(newUser);
-    return newUser;
-  }
-  function createURL(url, user){
-    let shortURL = randomString()
-
+  function urlsForUser(id) {
+    var output = {}
+    for (url in urlDatabase){
+      console.log(id)
+      if (urlDatabase[url].userID === id.id){
+      output[url] = urlDatabase[url]
+    console.log(output) 
     }
-
+    }
+  return output
+}
 
 
 // ENDPOINTS
@@ -109,7 +110,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls : urlDatabase,
+                                                    urls : urlsForUser(res.locals.user),
     name: users[req.cookies["user_id"]],
   }
   res.render("urls_index", templateVars)
@@ -191,9 +192,7 @@ app.post("/login", (req, res) => {
     res.status(400)
     res.send("Login Error: Please fill in both fields. <a href=/login>Retry</a>")
   }
-  
-  let checkr = authenticator(userEmail, userPass, users)
-  
+  let checkr = authenticator(userEmail, userPass, users)  
   if (checkr){
     res.cookie("user_id", checkr.id)
     res.redirect("urls")
