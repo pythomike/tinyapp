@@ -8,11 +8,30 @@
   app.set('view engine', "ejs")
   app.use(cookieParser())
 
+// MIDDLEWARE
+  app.use((req, res, next) => {
+    res.locals.user = getById(req.cookies.user_id, users);
+    next();
+  });
+
+  app.use('/urls/new', (req, res, next) => {
+    authorizor(req, res, next);
+  });
+
 // DATA
   var urlDatabase = {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "9sm5xK": "http://www.google.com"
+    "b2xVn2": {
+      url: "http://www.lighthouselabs.ca",
+      userID: "moike"
+    },
+    "9sm5xK": {
+      url: "http://www.google.com",
+      userID: "moike"
+    }
   };
+  //
+  // Need to add a value for createdBy. Each link needs to be associated with a userID
+  // 
   const users = { 
     "userRandomID": {
       id: "userRandomID", 
@@ -45,6 +64,43 @@
     }
     return undefined;
   }
+  function authorizor (req, res, next) {
+    if (res.locals.user === undefined){
+      res.sendStatus(403)
+    } else {
+      next()
+    }
+  }
+  function isThisYourLink(req, res, next){
+   
+
+  }
+
+  function getById(id) {
+    for (user in users) {
+      if (users[user].id === id) {
+        return users[user];
+      }
+    }
+    return undefined;
+  }
+
+  function createUser(email, name, password) {
+    const newUser = {
+      email,
+      name,
+      password: bcrypt.hashSync(password, 10),
+      id: rando(),
+    };
+    users.push(newUser);
+    return newUser;
+  }
+  function createURL(url, user){
+    let shortURL = randomString()
+
+    }
+
+
 
 // ENDPOINTS
 app.get("/", (req, res) => {
@@ -61,9 +117,11 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortURL = randomString()   
-  urlDatabase[shortURL] = req.body.longURL
+  let longURL = req.body.longURL
+  urlDatabase[shortURL] = {"url": longURL , "userID": res.locals.user.id}
   console.log("Adding:", shortURL, "-", req.body.longURL) // REMOVE BEFORE SUBMISSION
   res.redirect("/urls/" + shortURL);  
+
 });
 
 app.get("/urls/new", (req, res) => {
@@ -77,15 +135,17 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = { 
     data: {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]},
+    longURL: urlDatabase[req.params.id].url,
+    creator: urlDatabase[req.params.id].userID},
     name: users[req.cookies["user_id"]]
     }
-  res.render("urls_show", templateVars);
-  let user = (req.cookies.user_id)
-  console.log(user)
-  //console.log(users)
-  console.log(users[user])
-  
+
+  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID){
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(403)
+    res.send("That is not yours.")
+  }
 })
 
 app.post("/logout", (req, res) => {
@@ -108,13 +168,19 @@ app.get("/u/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   console.log("Deleting:", req.params.id, "-", urlDatabase[req.params.id]) // REMOVE BEFORE SUBMISSION
-  delete urlDatabase[req.params.id]
-  res.redirect("/urls")
+  
+  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID){
+    delete urlDatabase[req.params.id]
+    res.redirect("/urls")
+  } else {
+    res.status(403)
+    res.send("That is not yours.")
+  }
 })
 
 app.get("/login", (req, res) => {
-let templateVars = {name: users[req.cookies["user_id"]],}
-res.render("login", templateVars)
+  let templateVars = {name: users[req.cookies["user_id"]],}
+  res.render("login", templateVars)
 })
 
 app.post("/login", (req, res) => {
