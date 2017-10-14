@@ -8,7 +8,7 @@
       <% for(var i in urls) { %>
       <tr>
         <td><%= i %></td>
-        <td>&#10143 <a style="text-decoration:none;" href=<%= urls[i] %>><%= urls[i].url %></a></td> 
+        <td>&#10143 <a style="text-decoration:none;" href=<%= urls[i].url %>><%= urls[i].url %></a></td> 
         <td><a href="/urls/<%= i %>"><button>Edit</button></a> </td>
         <td>
           <form action="/urls/<%= i %>/delete" method="POST">        

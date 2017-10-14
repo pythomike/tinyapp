@@ -26,22 +26,22 @@
 
 // DATA
   var urlDatabase = {
-  //   "b2xVn2": {
-  //     url: "http://www.lighthouselabs.ca",
-  //     userID: "bob"
-  //   },
-  //   "9sm5xK": {
-  //     url: "http://www.google.com",
-  //     userID: "moike"
-  //   },
-  //   "6arg83": {
-  //     url: "http://www.cbc.ca",
-  //     userID: "moike"
-  //   },
-  //   "adfgae": {
-  //     url: "http://www.reddit.com",
-  //     userID: "moike"
-  //  }
+    "b2xVn2": {
+      url: "http://www.lighthouselabs.ca",
+      userID: "bob"
+    },
+    "9sm5xK": {
+      url: "http://www.google.com",
+      userID: "moike"
+    },
+    "6arg83": {
+      url: "http://www.cbc.ca",
+      userID: "moike"
+    },
+    "adfgae": {
+      url: "http://www.reddit.com",
+      userID: "moike"
+   }
   }
   const users = { 
     "userRandomID": {
@@ -109,7 +109,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-                                                    urls : urlsForUser(res.locals.user),
+    urls : urlsForUser(res.locals.user),
     name: users[req.session.user_id],
   }
   res.render("urls_index", templateVars)
@@ -236,6 +236,7 @@ app.post("/register", (req, res) => {
   users[userID] = newUser
   console.log(users)
   req.session.user_id = userID
+  console.log(users)
                                 // res.cookie("user_id", userID)
   res.redirect("urls")
 })
