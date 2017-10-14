@@ -5,13 +5,18 @@
   const PORT = process.env.PORT || 8080; // default port 8080
   const cookieParser = require('cookie-parser')
   const bcrypt = require('bcrypt');
+  var cookieSession = require('cookie-session')
   app.use(bodyParser.urlencoded({extended: true}));
   app.set('view engine', "ejs")
-  app.use(cookieParser())
+  
+  app.use(cookieSession({
+    name: 'session',
+    keys: ["darmok and jalad at tanagra"]
+  }))
 
 // MIDDLEWARE
   app.use((req, res, next) => {
-    res.locals.user = getById(req.cookies.user_id, users);
+    res.locals.user = getById(req.session.user_id, users);
     next();
   });
 
@@ -19,26 +24,24 @@
     authorizor(req, res, next);
   });
 
-
-
 // DATA
   var urlDatabase = {
-    "b2xVn2": {
-      url: "http://www.lighthouselabs.ca",
-      userID: "bob"
-    },
-    "9sm5xK": {
-      url: "http://www.google.com",
-      userID: "moike"
-    },
-    "6arg83": {
-      url: "http://www.cbc.ca",
-      userID: "moike"
-    },
-    "adfgae": {
-      url: "http://www.reddit.com",
-      userID: "moike"
-   }
+  //   "b2xVn2": {
+  //     url: "http://www.lighthouselabs.ca",
+  //     userID: "bob"
+  //   },
+  //   "9sm5xK": {
+  //     url: "http://www.google.com",
+  //     userID: "moike"
+  //   },
+  //   "6arg83": {
+  //     url: "http://www.cbc.ca",
+  //     userID: "moike"
+  //   },
+  //   "adfgae": {
+  //     url: "http://www.reddit.com",
+  //     userID: "moike"
+  //  }
   }
   const users = { 
     "userRandomID": {
@@ -54,7 +57,7 @@
     "moike": {
       id: "moike", 
       email: "m@m", 
-      password: "m"
+      password: "$2a$10$qDmzX7GkZW/TLvw.gYM3E./zGmpm/04U2isxO.EV8YtPmaUWHdXqa"
     }
   }
 
@@ -107,7 +110,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
                                                     urls : urlsForUser(res.locals.user),
-    name: users[req.cookies["user_id"]],
+    name: users[req.session.user_id],
   }
   res.render("urls_index", templateVars)
 })
@@ -118,12 +121,12 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = {"url": longURL , "userID": res.locals.user.id}
   console.log("Adding:", shortURL, "-", req.body.longURL) // REMOVE BEFORE SUBMISSION
   res.redirect("/urls/" + shortURL);  
-
+console.log(urlDatabase)
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    name: users[req.cookies["user_id"]]
+    name: users[req.session.user_id]
   }
   res.render("urls_new", templateVars);
 });
@@ -134,10 +137,10 @@ app.get("/urls/:id", (req, res) => {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id].url,
     creator: urlDatabase[req.params.id].userID},
-    name: users[req.cookies["user_id"]]
+    name: users[req.session.user_id]
     }
 
-  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID){
+  if (req.session.user_id === urlDatabase[req.params.id].userID){
     res.render("urls_show", templateVars);
   } else {
     res.status(403)
@@ -146,14 +149,16 @@ app.get("/urls/:id", (req, res) => {
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id")
+  // res.clearCookie("user_id")
+  req.session = null
   res.redirect("/urls")
 })
 
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL
+  urlDatabase[req.params.id].url = req.body.longURL // &&&&& FIX HERE
   console.log("New value for", req.params.id, "is", req.body.longURL) // REMOVE BEFORE SUBMISSION
   res.redirect("/urls/")
+  console.log(urlDatabase)
 })
 
 app.get("/u/:shortURL", (req, res) => {
@@ -164,7 +169,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   console.log("Deleting:", req.params.id, "-", urlDatabase[req.params.id]) // REMOVE BEFORE SUBMISSION
   
-  if (req.cookies["user_id"] === urlDatabase[req.params.id].userID){
+  if (req.session.user_id === urlDatabase[req.params.id].userID){
     delete urlDatabase[req.params.id]
     res.redirect("/urls")
   } else {
@@ -174,7 +179,7 @@ app.post("/urls/:id/delete", (req, res) => {
 })
 
 app.get("/login", (req, res) => {
-  let templateVars = {name: users[req.cookies["user_id"]],}
+  let templateVars = {name: users[req.session.user_id],}
   res.render("login", templateVars)
 })
 
@@ -188,7 +193,10 @@ app.post("/login", (req, res) => {
   }
   let checkr = authenticator(userEmail, userPass, users)  
   if (checkr){
-    res.cookie("user_id", checkr.id)
+
+    req.session.user_id = checkr.id
+                                    //res.cookie("user_id", checkr.id)
+    
     res.redirect("urls")
   } else {
     res.status(400)
@@ -198,7 +206,7 @@ app.post("/login", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    name: users[req.cookies["user_id"]],
+    name: users[req.session.user_id],
     user: users.name
   }
   res.render("register", templateVars)
@@ -227,7 +235,8 @@ app.post("/register", (req, res) => {
   }
   users[userID] = newUser
   console.log(users)
-  res.cookie("user_id", userID)
+  req.session.user_id = userID
+                                // res.cookie("user_id", userID)
   res.redirect("urls")
 })
 
