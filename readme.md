@@ -4,8 +4,10 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Registration page"](https://github.com/pythomike/tinyapp/blob/master/docs/register.png?raw=true)
+!["User-specific links"](https://github.com/pythomike/tinyapp/blob/master/docs/urls_home.png?raw=true)
+!["Create a new short URL"](https://github.com/pythomike/tinyapp/blob/master/docs/urls_create.png?raw=true)
+!["Edit an existing short URL"](https://github.com/pythomike/tinyapp/blob/master/docs/urls_edit.png?raw=true)
 
 ## Dependencies
 
